@@ -1,0 +1,165 @@
+#include <AFMotor.h>  
+#include <Wire.h>
+
+// Motor definitions using AFMotor library
+AF_DCMotor motor1A(1); // Right front motor
+AF_DCMotor motor1B(2); // Left front motor
+AF_DCMotor motor2A(3); // Right rear motor
+AF_DCMotor motor2B(4); // Left rear motor
+
+// sensor pins
+#define RIGHT_SENSOR A0
+#define LEFT_SENSOR A1
+#define MQ2 A2
+#define Flame A3
+#define LED A4
+#define Buzzer 13
+
+
+void setup() {
+  Serial.begin(9600);
+
+  // Initialize motor speeds
+  motor1A.setSpeed(100); // Speed range: 0-255
+  motor1B.setSpeed(100);
+  motor2A.setSpeed(100);
+  motor2B.setSpeed(100);
+
+  pinMode(Buzzer, OUTPUT);
+  pinMode(LED, OUTPUT);
+  pinMode(MQ2, INPUT);
+  pinMode(Flame, INPUT);
+
+  delay(2000);
+
+  Serial.println("Line Following Robot Initialized.");
+}
+
+void loop() {
+  // Read the sensors
+  int rightSensorValue = digitalRead(RIGHT_SENSOR);
+  int leftSensorValue = digitalRead(LEFT_SENSOR);
+  
+  
+  Serial.print("Left Sensor: ");
+  Serial.print(leftSensorValue);
+  Serial.print(" | Right Sensor: ");
+  Serial.println(rightSensorValue);
+
+  // Both sensors detect line - move forward
+  if (leftSensorValue == HIGH && rightSensorValue == HIGH) 
+  {
+    moveForward();
+  }
+
+  // Left sensor off the line - turn right
+  else if (leftSensorValue == LOW && rightSensorValue == HIGH) 
+  {
+    turnRight();
+  }
+
+  // Right sensor off the line - turn left
+  else if (leftSensorValue == HIGH && rightSensorValue == LOW) 
+  {
+    turnLeft();
+  }
+
+  // Both sensors off the line - stop
+  else if (leftSensorValue == HIGH && rightSensorValue == LOW)
+  {
+    stopMotors();
+  }
+  
+  // Both sensors off the line - stop
+  else 
+  {
+    stopMotors();
+  }
+
+  delay(100); // Small delay for stability
+
+  int gasValue = analogRead(MQ2);     
+  int flameValue = analogRead(Flame); 
+
+   if (gasValue > 680) {
+    Serial.println("Gas Detected : ");
+    Serial.println(gasValue);
+    activateAlarm();
+  } 
+  else {
+     digitalWrite(LED, LOW);
+     digitalWrite(Buzzer, LOW);
+    
+  }
+
+  // Check for flame detection
+  if (flameValue == HIGH) {
+    Serial.println("Flame Detected : ");
+    Serial.println(flameValue);
+    activateAlarm();
+  } 
+  else {
+    
+     digitalWrite(LED, LOW);
+     digitalWrite(Buzzer, LOW);
+  }
+
+  delay(1000);
+}
+
+// Function to move forward
+void moveForward() 
+{
+  motor1A.run(FORWARD);
+  motor1B.run(FORWARD);
+  motor2A.run(FORWARD);
+  motor2B.run(FORWARD);
+}
+
+
+// Function to turn right
+void turnRight() 
+{
+  motor1A.run(RELEASE); 
+  motor1B.run(FORWARD);
+  motor2A.run(RELEASE);  
+  motor2B.run(FORWARD);
+}
+
+
+// Function to turn left
+void turnLeft() 
+
+{
+  motor1A.run(FORWARD); 
+  motor1B.run(RELEASE);
+  motor2A.run(FORWARD);  
+  motor2B.run(RELEASE);
+}
+
+
+// Function to stop all motors
+void stopMotors() 
+{
+  motor1A.run(RELEASE);
+  motor1B.run(RELEASE);
+  motor2A.run(RELEASE);
+  motor2B.run(RELEASE);
+}
+
+void activateAlarm() {
+  digitalWrite(LED, HIGH);
+  digitalWrite(Buzzer, HIGH);
+
+  for (int i = 0; i < 5; i++) {
+    delay(500);
+    digitalWrite(Buzzer, LOW);
+    digitalWrite(LED, LOW);
+    delay(500);
+    digitalWrite(Buzzer, HIGH);
+    digitalWrite(LED, HIGH);
+  }
+
+  digitalWrite(LED, LOW);
+  digitalWrite(Buzzer, LOW);
+}
