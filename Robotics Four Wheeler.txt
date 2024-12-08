@@ -12,7 +12,7 @@ AF_DCMotor motor2B(4); // Left rear motor
 #define LEFT_SENSOR A1
 #define MQ2 A2
 #define Flame A3
-#define LED A4
+#define LED A5
 #define Buzzer 13
 
 
@@ -30,7 +30,6 @@ void setup() {
   pinMode(MQ2, INPUT);
   pinMode(Flame, INPUT);
 
-  delay(2000);
 
   Serial.println("Line Following Robot Initialized.");
 }
@@ -39,12 +38,43 @@ void loop() {
   // Read the sensors
   int rightSensorValue = digitalRead(RIGHT_SENSOR);
   int leftSensorValue = digitalRead(LEFT_SENSOR);
+  int gasValue = analogRead(MQ2);     
+  int flameValue = analogRead(Flame); 
   
   
-  Serial.print("Left Sensor: ");
+  Serial.print("Left Sensor : ");
   Serial.print(leftSensorValue);
-  Serial.print(" | Right Sensor: ");
-  Serial.println(rightSensorValue);
+  Serial.print(" | Right Sensor : ");
+  Serial.print(rightSensorValue);
+  Serial.print(" | Gas Detected : ");
+  Serial.print(gasValue);
+  Serial.print(" | Flame Detected : ");
+  Serial.println(flameValue);
+
+if (gasValue > 600) {
+    Serial.println("Gas Detected : ");
+    Serial.println(gasValue);
+    activateAlarm();
+  } 
+  else {
+     digitalWrite(LED, LOW);
+     digitalWrite(Buzzer, LOW);
+    
+  }
+
+  // Check for flame detection
+  if (flameValue < 550) {
+    Serial.println("Flame Detected : ");
+    Serial.println(flameValue);
+    activateAlarm();
+  } 
+  else {
+    
+     digitalWrite(LED, LOW);
+     digitalWrite(Buzzer, LOW);
+  }
+
+
 
   // Both sensors detect line - move forward
   if (leftSensorValue == HIGH && rightSensorValue == HIGH) 
@@ -55,17 +85,17 @@ void loop() {
   // Left sensor off the line - turn right
   else if (leftSensorValue == LOW && rightSensorValue == HIGH) 
   {
-    turnRight();
+    turnLeft();
   }
 
   // Right sensor off the line - turn left
   else if (leftSensorValue == HIGH && rightSensorValue == LOW) 
   {
-    turnLeft();
+    turnRight();
   }
 
   // Both sensors off the line - stop
-  else if (leftSensorValue == HIGH && rightSensorValue == LOW)
+  else if (leftSensorValue == LOW && rightSensorValue == LOW)
   {
     stopMotors();
   }
@@ -78,33 +108,9 @@ void loop() {
 
   delay(100); // Small delay for stability
 
-  int gasValue = analogRead(MQ2);     
-  int flameValue = analogRead(Flame); 
+  
 
-   if (gasValue > 680) {
-    Serial.println("Gas Detected : ");
-    Serial.println(gasValue);
-    activateAlarm();
-  } 
-  else {
-     digitalWrite(LED, LOW);
-     digitalWrite(Buzzer, LOW);
-    
-  }
-
-  // Check for flame detection
-  if (flameValue == HIGH) {
-    Serial.println("Flame Detected : ");
-    Serial.println(flameValue);
-    activateAlarm();
-  } 
-  else {
-    
-     digitalWrite(LED, LOW);
-     digitalWrite(Buzzer, LOW);
-  }
-
-  delay(1000);
+   
 }
 
 // Function to move forward
@@ -123,7 +129,7 @@ void turnRight()
   motor1A.run(RELEASE); 
   motor1B.run(FORWARD);
   motor2A.run(RELEASE);  
-  motor2B.run(FORWARD);
+  motor2B.run(RELEASE);
 }
 
 
@@ -133,7 +139,7 @@ void turnLeft()
 {
   motor1A.run(FORWARD); 
   motor1B.run(RELEASE);
-  motor2A.run(FORWARD);  
+  motor2A.run(RELEASE);  
   motor2B.run(RELEASE);
 }
 
@@ -147,7 +153,9 @@ void stopMotors()
   motor2B.run(RELEASE);
 }
 
-void activateAlarm() {
+
+void activateAlarm() 
+{
   digitalWrite(LED, HIGH);
   digitalWrite(Buzzer, HIGH);
 
