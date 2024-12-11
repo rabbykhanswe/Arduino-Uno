@@ -20,10 +20,10 @@ void setup() {
   Serial.begin(9600);
 
   // Initialize motor speeds
-  motor1A.setSpeed(100); // Speed range: 0-255
-  motor1B.setSpeed(100);
-  motor2A.setSpeed(100);
-  motor2B.setSpeed(100);
+  motor1A.setSpeed(200); // Speed range: 0-255
+  motor1B.setSpeed(200);
+  motor2A.setSpeed(200);
+  motor2B.setSpeed(200);
 
   pinMode(Buzzer, OUTPUT);
   pinMode(LED, OUTPUT);
@@ -36,8 +36,8 @@ void setup() {
 
 void loop() {
   // Read the sensors
-  int rightSensorValue = digitalRead(RIGHT_SENSOR);
-  int leftSensorValue = digitalRead(LEFT_SENSOR);
+  int rightSensorValue = analogRead(RIGHT_SENSOR);
+  int leftSensorValue = analogRead(LEFT_SENSOR);
   int gasValue = analogRead(MQ2);     
   int flameValue = analogRead(Flame); 
   
@@ -51,7 +51,7 @@ void loop() {
   Serial.print(" | Flame Detected : ");
   Serial.println(flameValue);
 
-if (gasValue > 600) {
+if (gasValue > 680) {
     Serial.println("Gas Detected : ");
     Serial.println(gasValue);
     activateAlarm();
@@ -77,25 +77,25 @@ if (gasValue > 600) {
 
 
   // Both sensors detect line - move forward
-  if (leftSensorValue == HIGH && rightSensorValue == HIGH) 
+  if (leftSensorValue < 150 && rightSensorValue < 150) 
   {
     moveForward();
   }
 
   // Left sensor off the line - turn right
-  else if (leftSensorValue == LOW && rightSensorValue == HIGH) 
+  else if (leftSensorValue > 900 && rightSensorValue > 150) 
   {
     turnLeft();
   }
 
   // Right sensor off the line - turn left
-  else if (leftSensorValue == HIGH && rightSensorValue == LOW) 
+  else if (leftSensorValue < 150 && rightSensorValue > 900) 
   {
     turnRight();
   }
 
   // Both sensors off the line - stop
-  else if (leftSensorValue == LOW && rightSensorValue == LOW)
+  else if (leftSensorValue > 900 && rightSensorValue > 900)
   {
     stopMotors();
   }
