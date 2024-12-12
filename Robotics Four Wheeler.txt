@@ -20,10 +20,10 @@ void setup() {
   Serial.begin(9600);
 
   // Initialize motor speeds
-  motor1A.setSpeed(200); // Speed range: 0-255
-  motor1B.setSpeed(200);
-  motor2A.setSpeed(200);
-  motor2B.setSpeed(200);
+  motor1A.setSpeed(70); // Speed range: 0-255
+  motor1B.setSpeed(70);
+  motor2A.setSpeed(70);
+  motor2B.setSpeed(70);
 
   pinMode(Buzzer, OUTPUT);
   pinMode(LED, OUTPUT);
@@ -51,7 +51,7 @@ void loop() {
   Serial.print(" | Flame Detected : ");
   Serial.println(flameValue);
 
-if (gasValue > 680) {
+if (gasValue > 580) {
     Serial.println("Gas Detected : ");
     Serial.println(gasValue);
     activateAlarm();
@@ -63,7 +63,7 @@ if (gasValue > 680) {
   }
 
   // Check for flame detection
-  if (flameValue < 550) {
+  if (flameValue < 520) {
     Serial.println("Flame Detected : ");
     Serial.println(flameValue);
     activateAlarm();
@@ -83,7 +83,7 @@ if (gasValue > 680) {
   }
 
   // Left sensor off the line - turn right
-  else if (leftSensorValue > 900 && rightSensorValue > 150) 
+  else if (leftSensorValue > 900 && rightSensorValue < 150) 
   {
     turnLeft();
   }
@@ -126,10 +126,10 @@ void moveForward()
 // Function to turn right
 void turnRight() 
 {
-  motor1A.run(RELEASE); 
+  motor1A.run(BACKWARD); 
   motor1B.run(FORWARD);
-  motor2A.run(RELEASE);  
-  motor2B.run(RELEASE);
+  motor2A.run(BACKWARD);  
+  motor2B.run(FORWARD);
 }
 
 
@@ -138,9 +138,9 @@ void turnLeft()
 
 {
   motor1A.run(FORWARD); 
-  motor1B.run(RELEASE);
-  motor2A.run(RELEASE);  
-  motor2B.run(RELEASE);
+  motor1B.run(BACKWARD);
+  motor2A.run(FORWARD);  
+  motor2B.run(BACKWARD);
 }
 
 
@@ -170,4 +170,5 @@ void activateAlarm()
 
   digitalWrite(LED, LOW);
   digitalWrite(Buzzer, LOW);
-}
+
+}  
